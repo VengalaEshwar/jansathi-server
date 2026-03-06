@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 
+import chatRouter from "./routers/chat.router.js";
+
 import authRouter from "./routers/auth.router.js";
 
 const app = express();
@@ -38,7 +40,20 @@ app.get("/", (req, res) => {
 // app.use("/api/users", userRoutes);
 
 app.use("/api/auth", authRouter);
+app.use("/api/chat", chatRouter);
 
+
+/* =====================
+   api for models of gemini ai
+===================== */
+app.get("/models", async (req, res) => {
+  const { GoogleGenAI } = await import("@google/genai");
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const models = await ai.models.list();
+  const list = [];
+  for await (const m of models) list.push(m.name);
+  res.json(list);
+});
 /* =====================
    Global Error Handler
 ===================== */
