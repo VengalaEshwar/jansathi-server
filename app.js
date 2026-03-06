@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 
+import authRouter from "./routers/auth.router.js";
+
 const app = express();
 
 /* =====================
@@ -35,6 +37,7 @@ app.get("/", (req, res) => {
 // import userRoutes from "./routes/user.routes.js";
 // app.use("/api/users", userRoutes);
 
+app.use("/api/auth", authRouter);
 
 /* =====================
    Global Error Handler
