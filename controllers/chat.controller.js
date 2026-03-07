@@ -49,7 +49,7 @@ const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
 export const chat = async (req, res) => {
   try {
-    const { message, conversationHistory = [], language = "en" } = req.body;
+    const { message, conversationHistory = [], language  } = req.body;
 
     if (!message) {
       return res.status(400).json({ success: false, message: "Message is required" });
@@ -58,7 +58,7 @@ export const chat = async (req, res) => {
     const historyText = conversationHistory
       .map((m) => `${m.role === "assistant" ? "JanSathi AI" : "User"}: ${m.content}`)
       .join("\n");
-
+    console.log("language : ",language);
     const languageInstruction = language === "hi"
       ? "Always respond in Hindi (Devanagari script). Be simple and clear."
       : "Always respond in English. Be simple and clear.";
