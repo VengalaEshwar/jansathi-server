@@ -5,6 +5,7 @@ import morgan from "morgan";
 import chatRouter from "./routers/chat.router.js";
 import ocrRouter from "./routers/ocr.router.js";
 import authRouter from "./routers/auth.router.js";
+import formRouter from "./routers/form.router.js";
 
 const app = express();
 
@@ -45,7 +46,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/ocr", ocrRouter);
-
+app.use("/api/form", formRouter);
 /* =====================
    api for models of gemini ai
 ===================== */

@@ -2,24 +2,27 @@ import admin from "../configs/firebase.config.js";
 import User from "../models/user.model.js";
 
 const verifyFirebaseToken = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  let token = null;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized - No token provided",
-    });
+  // Check Authorization header first
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split("Bearer ")[1];
   }
 
-  const token = authHeader.split("Bearer ")[1];
+  // Fall back to query param (for GET download links)
+  if (!token && req.query.token) {
+    token = req.query.token;
+  }
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Unauthorized - No token provided" });
+  }
 
   try {
-    // Verify token with Firebase Admin
     const decodedToken = await admin.auth().verifyIdToken(token);
 
-    // Auto-create user in MongoDB if first login
     let user = await User.findOne({ uid: decodedToken.uid });
-
     if (!user) {
       user = await User.create({
         uid: decodedToken.uid,
@@ -29,14 +32,11 @@ const verifyFirebaseToken = async (req, res, next) => {
       });
     }
 
-    req.user = decodedToken; // Firebase token data
-    req.dbUser = user;       // MongoDB user data
+    req.user = decodedToken;
+    req.dbUser = user;
     next();
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized - Invalid token",
-    });
+    return res.status(401).json({ success: false, message: "Unauthorized - Invalid token" });
   }
 };
 

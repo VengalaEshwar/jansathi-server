@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.44.0",
+    "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -25,6 +26,8 @@
     "mongoose": "^9.2.4",
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "pdf-lib": "^1.17.1",
+    "sharp": "^0.34.5"
   }
 }
