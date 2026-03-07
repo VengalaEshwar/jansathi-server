@@ -6,7 +6,7 @@ import chatRouter from "./routers/chat.router.js";
 import ocrRouter from "./routers/ocr.router.js";
 import authRouter from "./routers/auth.router.js";
 import formRouter from "./routers/form.router.js";
-
+import schemeRouter from "./routers/scheme.router.js";
 const app = express();
 
 /* =====================
@@ -47,6 +47,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/ocr", ocrRouter);
 app.use("/api/form", formRouter);
+app.use("/api/schemes", schemeRouter);
 /* =====================
    api for models of gemini ai
 ===================== */
