@@ -3,7 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 
 import chatRouter from "./routers/chat.router.js";
-
+import ocrRouter from "./routers/ocr.router.js";
 import authRouter from "./routers/auth.router.js";
 
 const app = express();
@@ -24,6 +24,9 @@ app.use(express.urlencoded({ extended: true }));
 // Logger
 app.use(morgan("dev"));
 
+// increase payload limit for OCR image uploads
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 /* =====================
    Health Check Route
 ===================== */
@@ -41,7 +44,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
-
+app.use("/api/ocr", ocrRouter);
 
 /* =====================
    api for models of gemini ai
