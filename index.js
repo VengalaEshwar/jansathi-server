@@ -1,10 +1,10 @@
 import app from "./app.js";
 import env from "./configs/env.config.js";
 import connectDB from "./configs/db.config.js";
-
+// import  importSchemes  from "./utils/loader.js";
 // Connect Database
 connectDB();
-
+// importSchemes(); // dont run this line
 // Start Server
 const server = app.listen(env.PORT, () => {
   console.log(
