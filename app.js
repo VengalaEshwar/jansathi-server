@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import admin from "./configs/firebase.config.js";
 
 import chatRouter from "./routers/chat.router.js";
 import ocrRouter from "./routers/ocr.router.js";
@@ -76,6 +77,19 @@ app.get("/models", async (req, res) => {
   const list = [];
   for await (const m of models) list.push(m.name);
   res.json(list);
+});
+
+
+/* =====================
+Api to test firebase integration - returns projectId if firebase is working, else error message
+===================== */
+app.get("/test-firebase", async (req, res) => {
+  try {
+    const app = admin.app();
+    res.json({ success: true, projectId: app.options.credential.projectId ?? "initialized" });
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
 });
 /* =====================
    Global Error Handler
