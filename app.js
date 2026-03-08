@@ -14,7 +14,27 @@ const app = express();
 ===================== */
 
 // Enable CORS
-app.use(cors());
+const allowedOrigins = [
+  // Web production - add your actual web hosting URL here
+  "https://jansathi.netlify.app/",
+  "https://jansathi.eshwarvengala.in/",
+  // Web development
+  "http://localhost:8081",
+  "http://localhost:19006",
+  "http://localhost:3000",
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow mobile apps (no origin) and allowed web origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
 
 // Parse JSON requests
 app.use(express.json());
