@@ -36,7 +36,14 @@ const verifyFirebaseToken = async (req, res, next) => {
     req.dbUser = user;
     next();
   } catch (error) {
-    return res.status(401).json({ success: false, message: "Unauthorized - Invalid token" });
+    console.error("Token error:", error.code, error.message);
+    return res.status(401).json({ 
+      success: false, 
+      message: "Invalid token",
+      errorCode: error.code,  // ← add this
+      tokenPreview: token?.substring(0, 30) // ← add this
+    });
+    
   }
 };
 
