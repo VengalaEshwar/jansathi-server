@@ -15,10 +15,8 @@ const app = express();
 
 // Enable CORS
 const allowedOrigins = [
-  // Web production - add your actual web hosting URL here
-  "https://jansathi.netlify.app/",
-  "https://jansathi.eshwarvengala.in/",
-  // Web development
+  "https://jansathi.netlify.app",        // ← removed trailing slash
+  "https://jansathi.eshwarvengala.in",   // ← removed trailing slash
   "http://localhost:8081",
   "http://localhost:19006",
   "http://localhost:3000",
