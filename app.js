@@ -15,8 +15,8 @@ const app = express();
 
 // Enable CORS
 const allowedOrigins = [
-  "https://jansathi.netlify.app",        // ← removed trailing slash
-  "https://jansathi.eshwarvengala.in",   // ← removed trailing slash
+  "https://jansathi.netlify.app",
+  "https://jansathi.eshwarvengala.in",
   "http://localhost:8081",
   "http://localhost:19006",
   "http://localhost:3000",
