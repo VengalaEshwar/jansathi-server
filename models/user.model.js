@@ -38,6 +38,22 @@ const userSchema = new mongoose.Schema(
         }
       ],
     },
+    prescriptionHistory: [
+      {
+        imageUrl: { type: String },
+        imagePublicId: { type: String },
+        result: { type: String },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+    medicineHistory: [
+      {
+        imageUrl: { type: String },
+        imagePublicId: { type: String },
+        result: { type: String },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

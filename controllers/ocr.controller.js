@@ -1,7 +1,60 @@
 import Groq from "groq-sdk";
 import env from "../configs/env.config.js";
+import cloudinary from "../configs/cloudinary.config.js";
+import User from "../models/user.model.js";
+import verifyFirebaseToken from "../utils/firebaseAuth.js";
 
 const groq = new Groq({ apiKey: env.GROQ_API_KEY });
+
+// Helper: upload buffer to Cloudinary
+const uploadToCloudinary = (buffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, transformation: [{ quality: "auto", fetch_format: "auto" }] },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+};
+
+// Helper: save to user history (max 10, delete oldest from Cloudinary)
+const saveToHistory = async (uid, type, imageUrl, imagePublicId, result) => {
+  try {
+    const user = await User.findOne({ uid });
+    if (!user) return;
+
+    const historyField = type === "prescription" ? "prescriptionHistory" : "medicineHistory";
+    const history = user[historyField] || [];
+
+    // If already 10 entries, delete the oldest image from Cloudinary
+    if (history.length >= 10) {
+      const oldest = history[0];
+      if (oldest.imagePublicId) {
+        await cloudinary.uploader.destroy(oldest.imagePublicId);
+      }
+      // Remove oldest from array
+      await User.findOneAndUpdate(
+        { uid },
+        { $pop: { [historyField]: -1 } } // -1 removes first element
+      );
+    }
+
+    // Push new entry
+    await User.findOneAndUpdate(
+      { uid },
+      {
+        $push: {
+          [historyField]: { imageUrl, imagePublicId, result, createdAt: new Date() },
+        },
+      }
+    );
+  } catch (e) {
+    console.error("Failed to save history:", e.message);
+  }
+};
 
 export const readPrescription = async (req, res) => {
   try {
@@ -53,6 +106,21 @@ Keep it simple. Use plain English for frequency (e.g. "Twice a day" not "BID").`
     });
 
     const prescriptionText = response.choices[0].message.content;
+
+    // Upload image to Cloudinary and save to history
+    try {
+      const uploaded = await uploadToCloudinary(req.file.buffer, "jansathi/prescriptions");
+      await saveToHistory(
+        req.user.uid,
+        "prescription",
+        uploaded.secure_url,
+        uploaded.public_id,
+        prescriptionText
+      );
+    } catch (e) {
+      console.error("History save failed (non-critical):", e.message);
+    }
+
     res.json({ success: true, prescriptionText });
   } catch (error) {
     console.error("OCR error:", error);
@@ -113,9 +181,40 @@ Keep it simple and easy to understand.`,
     });
 
     const analysis = response.choices[0].message.content;
+
+    // Upload image to Cloudinary and save to history
+    try {
+      const uploaded = await uploadToCloudinary(req.file.buffer, "jansathi/medicines");
+      await saveToHistory(
+        req.user.uid,
+        "medicine",
+        uploaded.secure_url,
+        uploaded.public_id,
+        analysis
+      );
+    } catch (e) {
+      console.error("History save failed (non-critical):", e.message);
+    }
+
     res.json({ success: true, analysis });
   } catch (error) {
     console.error("Medicine analysis error:", error);
     res.status(500).json({ success: false, message: error.message || "Analysis failed" });
+  }
+};
+export const getHistory = async (req, res) => {
+  try {
+    const { type } = req.params; // "prescription" or "medicine"
+    const user = await User.findOne({ uid: req.user.uid });
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    const history = type === "prescription"
+      ? user.prescriptionHistory
+      : user.medicineHistory;
+
+    // Return newest first
+    res.json({ success: true, history: [...history].reverse() });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
