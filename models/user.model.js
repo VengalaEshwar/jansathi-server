@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["user", "admin"], default: "user" },
     avatar: { type: String, default: "" },
     isVerified: { type: Boolean, default: false },
-
+    avatarPublicId: { type: String, default: "" },
     // ── Preferences ──────────────────────────────────────────────
     language: { type: String, enum: ["en", "hi", "te"], default: "en" },
     notifications: {
