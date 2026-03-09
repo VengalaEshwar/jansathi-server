@@ -54,7 +54,16 @@ const userSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    formHistory: [
+      {
+        pdfUrl: { type: String },
+        pdfPublicId: { type: String },
+        formFields: [{ label: { type: String }, value: { type: String } }],
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
+  
   { timestamps: true }
 );
 
