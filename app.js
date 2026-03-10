@@ -8,6 +8,9 @@ import ocrRouter from "./routers/ocr.router.js";
 import authRouter from "./routers/auth.router.js";
 import formRouter from "./routers/form.router.js";
 import schemeRouter from "./routers/scheme.router.js";
+import reminderRouter from "./routers/reminder.router.js";
+import cronRouter from "./routers/cron.router.js";
+
 const app = express();
 
 /* =====================
@@ -34,6 +37,24 @@ app.use(cors({
   },
   credentials: true,
 }));
+
+
+
+ // ── Local cron (dev only) ──────────────────────────────────
+    if (process.env.NODE_ENV !== "production") {
+      import("node-cron").then(({ default: cron }) => {
+        cron.schedule("* * * * *", async () => {
+          try {
+            const res = await fetch("http://localhost:5000/api/cron/check-reminders");
+            const data = await res.json();
+          } catch (e) {
+            console.error("Local cron error:", e.message);
+          }
+        });
+        console.log("✅ Local cron scheduler started");
+      });
+    }
+
 
 // Parse JSON requests
 app.use(express.json());
@@ -67,6 +88,8 @@ app.use("/api/chat", chatRouter);
 app.use("/api/ocr", ocrRouter);
 app.use("/api/form", formRouter);
 app.use("/api/schemes", schemeRouter);
+app.use("/api/reminders", reminderRouter);
+app.use("/api/cron", cronRouter);
 /* =====================
    api for models of gemini ai
 ===================== */

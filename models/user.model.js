@@ -8,7 +8,13 @@ const userSchema = new mongoose.Schema(
       sparse: true,
     },
     name: { type: String, trim: true, default: "" },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     phone: { type: String, default: null },
     password: { type: String, minlength: 6, select: false, default: null },
     role: { type: String, enum: ["user", "admin"], default: "user" },
@@ -35,7 +41,7 @@ const userSchema = new mongoose.Schema(
         {
           label: { type: String },
           value: { type: String },
-        }
+        },
       ],
     },
     prescriptionHistory: [
@@ -60,11 +66,35 @@ const userSchema = new mongoose.Schema(
         pdfPublicId: { type: String },
         formFields: [{ label: { type: String }, value: { type: String } }],
         createdAt: { type: Date, default: Date.now },
+        pdfBase64: { type: String, default: "" },
+      },
+    ],
+    phoneVerified: { type: Boolean, default: false },
+    emailVerified: { type: Boolean, default: false },
+    phoneOtp: { type: String, default: null },
+    phoneOtpExpiry: { type: Date, default: null },
+    emailOtp: { type: String, default: null },
+    emailOtpExpiry: { type: Date, default: null },
+    fcmToken: { type: String, default: "" },
+
+    medicationReminders: [
+      {
+        medicineName: String,
+        dosage: String,
+        times: [String], // ["08:00", "20:00"]
+        startDate: Date,
+        endDate: Date, // null = forever
+        isEveryday: Boolean,
+        notifyApp: Boolean,
+        notifySms: Boolean,
+        notifyEmail: Boolean,
+        isActive: Boolean,
+        createdAt: Date,
       },
     ],
   },
-  
-  { timestamps: true }
+
+  { timestamps: true },
 );
 
 const User = mongoose.model("User", userSchema);
