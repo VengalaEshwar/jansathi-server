@@ -7,7 +7,6 @@ const env = {
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET || "defaultsecret",
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "1d",
-  // CLIENT_URL: process.env.CLIENT_URL || "http://localhost:8081",
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL,
   FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY,
@@ -21,10 +20,11 @@ const env = {
   FAST2SMS_API_KEY: process.env.FAST2SMS_API_KEY,
   FCM_SERVER_KEY: process.env.FCM_SERVER_KEY,
   TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
-TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
-TWILIO_PHONE: process.env.TWILIO_PHONE,
-TWILIO_VERIFIED_NUMBERS: process.env.TWILIO_VERIFIED_NUMBERS,
-IS_PRODUCTION: process.env.NODE_ENV === "production",
+  TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
+  TWILIO_PHONE: process.env.TWILIO_PHONE,
+  TWILIO_VERIFIED_NUMBERS: process.env.TWILIO_VERIFIED_NUMBERS,
+  IS_PRODUCTION: process.env.NODE_ENV === "production",
+  CRON_SECRET: process.env.CRON_SECRET,  // ← added
 };
 
 export default env;

@@ -51,6 +51,7 @@ const sendGroupedEmail = async (email, name, reminders, time) => {
         </div>
       `,
     });
+    console.log(`📧 Email sent to ${email}`);
   } catch (e) {
     console.error("Email error:", e.message);
   }
@@ -63,9 +64,7 @@ const sendGroupedSms = async (phone, name, reminders, time) => {
     if (reminders.length === 1) {
       message = `JanSathi Reminder: Time to take ${reminders[0].medicineName} - ${reminders[0].dosage}`;
     } else {
-      const list = reminders
-        .map((r) => `${r.medicineName} (${r.dosage})`)
-        .join(", ");
+      const list = reminders.map((r) => `${r.medicineName} (${r.dosage})`).join(", ");
       message = `JanSathi Reminder at ${time}: Take ${list}`;
     }
     await sendReminderSms(phone, message);
@@ -76,6 +75,12 @@ const sendGroupedSms = async (phone, name, reminders, time) => {
 
 // ── Check Reminders ───────────────────────────────────────────────
 export const checkReminders = async (req, res) => {
+  // ── Security guard — only Atlas or local dev can call this ────
+  const secret = req.headers["x-cron-secret"];
+  if (env.IS_PRODUCTION && secret !== env.CRON_SECRET) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
   try {
     const now = new Date();
     const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
@@ -89,25 +94,21 @@ export const checkReminders = async (req, res) => {
     let notificationsSent = 0;
 
     for (const user of users) {
-      // Collect all matched reminders for this user at this time
       const matchedReminders = [];
 
       for (const reminder of user.medicationReminders) {
         if (!reminder.isActive) continue;
 
-        // Check startDate
         const start = new Date(reminder.startDate);
         start.setHours(0, 0, 0, 0);
         if (today < start) continue;
 
-        // Check endDate
         if (reminder.endDate) {
           const end = new Date(reminder.endDate);
           end.setHours(23, 59, 59, 999);
           if (today > end) continue;
         }
 
-        // Normalize time format (handle "4:12" vs "04:12")
         const normalizedTimes = reminder.times.map((t) => {
           const [h, m] = t.split(":");
           return `${String(Number(h)).padStart(2, "0")}:${String(Number(m)).padStart(2, "0")}`;
@@ -120,27 +121,23 @@ export const checkReminders = async (req, res) => {
 
       if (matchedReminders.length === 0) continue;
 
-      console.log(`✅ ${user.email} — ${matchedReminders.length} reminder(s) matched at ${currentTime}`);
+      console.log(`✅ ${user.email} — ${matchedReminders.length} reminder(s) at ${currentTime}`);
       console.log(`   Medicines: ${matchedReminders.map((r) => r.medicineName).join(", ")}`);
 
-      // Check which notification types are needed
       const needsSms = matchedReminders.some((r) => r.notifySms) && user.phone && user.phoneVerified;
       const needsEmail = matchedReminders.some((r) => r.notifyEmail) && user.email && user.emailVerified;
 
-      // Filter reminders per notification type
       const smsReminders = matchedReminders.filter((r) => r.notifySms);
       const emailReminders = matchedReminders.filter((r) => r.notifyEmail);
 
-      // Send 1 grouped SMS
       if (needsSms && smsReminders.length > 0) {
-        console.log(`   📱 Sending grouped SMS for ${smsReminders.length} medicine(s)...`);
+        console.log(`   📱 Sending SMS for ${smsReminders.length} medicine(s)...`);
         await sendGroupedSms(user.phone, user.name, smsReminders, currentTime);
         notificationsSent++;
       }
 
-      // Send 1 grouped Email
       if (needsEmail && emailReminders.length > 0) {
-        console.log(`   📧 Sending grouped Email for ${emailReminders.length} medicine(s)...`);
+        console.log(`   📧 Sending Email for ${emailReminders.length} medicine(s)...`);
         await sendGroupedEmail(user.email, user.name, emailReminders, currentTime);
         notificationsSent++;
       }
@@ -158,8 +155,14 @@ export const checkReminders = async (req, res) => {
   }
 };
 
-// ── Cleanup Expired Reminders (runs daily at midnight) ────────────
+// ── Cleanup Expired Reminders ─────────────────────────────────────
 export const cleanupReminders = async (req, res) => {
+  // ── Security guard ────────────────────────────────────────────
+  const secret = req.headers["x-cron-secret"];
+  if (env.IS_PRODUCTION && secret !== env.CRON_SECRET) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

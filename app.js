@@ -13,11 +13,7 @@ import cronRouter from "./routers/cron.router.js";
 
 const app = express();
 
-/* =====================
-   Global Middlewares
-===================== */
-
-// Enable CORS
+// ── CORS ──────────────────────────────────────────────────────────
 const allowedOrigins = [
   "https://jansathi.netlify.app",
   "https://jansathi.eshwarvengala.in",
@@ -28,7 +24,6 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow mobile apps (no origin) and allowed web origins
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -38,51 +33,17 @@ app.use(cors({
   credentials: true,
 }));
 
-
-
- // ── Local cron (dev only) ──────────────────────────────────
-    if (process.env.NODE_ENV !== "production") {
-      import("node-cron").then(({ default: cron }) => {
-        cron.schedule("* * * * *", async () => {
-          try {
-            const res = await fetch("http://localhost:5000/api/cron/check-reminders");
-            const data = await res.json();
-          } catch (e) {
-            console.error("Local cron error:", e.message);
-          }
-        });
-        console.log("✅ Local cron scheduler started");
-      });
-    }
-
-
-// Parse JSON requests
-app.use(express.json());
-
-// Parse URL encoded data
-app.use(express.urlencoded({ extended: true }));
-
-// Logger
-app.use(morgan("dev"));
-
-// increase payload limit for OCR image uploads
+// ── Middlewares ───────────────────────────────────────────────────
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
-/* =====================
-   Health Check Route
-===================== */
+app.use(morgan("dev"));
 
+// ── Health Check ──────────────────────────────────────────────────
 app.get("/", (req, res) => {
   res.send("🚀 Jansathi API is running...");
 });
 
-/* =====================
-   Routes
-===================== */
-// Example:
-// import userRoutes from "./routes/user.routes.js";
-// app.use("/api/users", userRoutes);
-
+// ── Routes ────────────────────────────────────────────────────────
 app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/ocr", ocrRouter);
@@ -90,9 +51,8 @@ app.use("/api/form", formRouter);
 app.use("/api/schemes", schemeRouter);
 app.use("/api/reminders", reminderRouter);
 app.use("/api/cron", cronRouter);
-/* =====================
-   api for models of gemini ai
-===================== */
+
+// ── Gemini Models ─────────────────────────────────────────────────
 app.get("/models", async (req, res) => {
   const { GoogleGenAI } = await import("@google/genai");
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -102,25 +62,19 @@ app.get("/models", async (req, res) => {
   res.json(list);
 });
 
-
-/* =====================
-Api to test firebase integration - returns projectId if firebase is working, else error message
-===================== */
+// ── Firebase Test ─────────────────────────────────────────────────
 app.get("/test-firebase", async (req, res) => {
   try {
-    const app = admin.app();
-    res.json({ success: true, projectId: app.options.credential.projectId ?? "initialized" });
+    const a = admin.app();
+    res.json({ success: true, projectId: a.options.credential.projectId ?? "initialized" });
   } catch (e) {
     res.json({ success: false, error: e.message });
   }
 });
-/* =====================
-   Global Error Handler
-===================== */
 
+// ── Global Error Handler ──────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err.stack);
-
   res.status(err.status || 500).json({
     success: false,
     message: err.message || "Internal Server Error",
