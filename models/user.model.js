@@ -85,11 +85,11 @@ const userSchema = new mongoose.Schema(
         startDate: Date,
         endDate: Date, // null = forever
         isEveryday: Boolean,
-        notifyApp: Boolean,
         notifySms: Boolean,
         notifyEmail: Boolean,
         isActive: Boolean,
         createdAt: Date,
+        notifyApp: { type: Boolean, default: false },
       },
     ],
   },
