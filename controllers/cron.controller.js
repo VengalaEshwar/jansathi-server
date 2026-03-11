@@ -3,6 +3,18 @@ import transporter from "../configs/nodemailer.config.js";
 import env from "../configs/env.config.js";
 import { sendReminderSms } from "./reminder.controller.js";
 
+// ── IST offset ────────────────────────────────────────────────────
+const IST_OFFSET = 5.5 * 60 * 60 * 1000;
+
+const getISTTime = () => {
+  const now = new Date();
+  const istNow = new Date(now.getTime() + IST_OFFSET);
+  const currentTime = `${String(istNow.getUTCHours()).padStart(2, "0")}:${String(istNow.getUTCMinutes()).padStart(2, "0")}`;
+  const today = new Date(now.getTime() + IST_OFFSET);
+  today.setUTCHours(0, 0, 0, 0);
+  return { currentTime, today, istNow };
+};
+
 // ── Send Grouped Email ────────────────────────────────────────────
 const sendGroupedEmail = async (email, name, reminders, time) => {
   try {
@@ -75,20 +87,28 @@ const sendGroupedSms = async (phone, name, reminders, time) => {
 
 // ── Check Reminders ───────────────────────────────────────────────
 export const checkReminders = async (req, res) => {
-  // ── Security guard — only Atlas or local dev can call this ────
+  // ── Security guard ────────────────────────────────────────────
   const secret = req.headers["x-cron-secret"];
   if (env.IS_PRODUCTION && secret !== env.CRON_SECRET) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
   try {
-    const now = new Date();
-    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const { currentTime, today } = getISTTime();
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // ── Skip if not a valid 15-min slot ───────────────────────
+    const validMinutes = ["00", "15", "30", "45"];
+    const currentMinute = currentTime.split(":")[1];
+    if (!validMinutes.includes(currentMinute)) {
+      return res.json({
+        success: true,
+        skipped: true,
+        currentTime,
+        reason: `Not a 15min slot`,
+      });
+    }
 
-    console.log(`\n=== CRON: ${currentTime} ===`);
+    console.log(`\n=== CRON IST: ${currentTime} ===`);
 
     const users = await User.find({ "medicationReminders.isActive": true });
     let notificationsSent = 0;
@@ -99,16 +119,19 @@ export const checkReminders = async (req, res) => {
       for (const reminder of user.medicationReminders) {
         if (!reminder.isActive) continue;
 
-        const start = new Date(reminder.startDate);
-        start.setHours(0, 0, 0, 0);
+        // Check startDate in IST
+        const start = new Date(new Date(reminder.startDate).getTime() + IST_OFFSET);
+        start.setUTCHours(0, 0, 0, 0);
         if (today < start) continue;
 
+        // Check endDate in IST
         if (reminder.endDate) {
-          const end = new Date(reminder.endDate);
-          end.setHours(23, 59, 59, 999);
+          const end = new Date(new Date(reminder.endDate).getTime() + IST_OFFSET);
+          end.setUTCHours(23, 59, 59, 999);
           if (today > end) continue;
         }
 
+        // Normalize stored times
         const normalizedTimes = reminder.times.map((t) => {
           const [h, m] = t.split(":");
           return `${String(Number(h)).padStart(2, "0")}:${String(Number(m)).padStart(2, "0")}`;
@@ -164,15 +187,16 @@ export const cleanupReminders = async (req, res) => {
   }
 
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Today in IST
+    const todayIST = new Date(new Date().getTime() + IST_OFFSET);
+    todayIST.setUTCHours(0, 0, 0, 0);
 
     await User.updateMany(
-      { "medicationReminders.endDate": { $lt: today } },
+      { "medicationReminders.endDate": { $lt: todayIST } },
       { $set: { "medicationReminders.$[elem].isActive": false } },
       {
         arrayFilters: [
-          { "elem.endDate": { $lt: today }, "elem.isActive": true },
+          { "elem.endDate": { $lt: todayIST }, "elem.isActive": true },
         ],
       }
     );
