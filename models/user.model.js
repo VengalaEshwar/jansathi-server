@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema(
     avatarPublicId: { type: String, default: "" },
     // ── Preferences ──────────────────────────────────────────────
     language: { type: String, enum: ["en", "hi", "te"], default: "en" },
+    theme: { type: String, enum: ["dark", "light"], default: "dark" },
     notifications: {
       enabled: { type: Boolean, default: true },
       medicationReminders: { type: Boolean, default: true },
