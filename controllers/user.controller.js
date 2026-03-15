@@ -28,6 +28,8 @@ export const updatePreferences = async (req, res) => {
     const { language, notifications } = req.body;
     const updateData = {};
     if (language) updateData.language = language;
+    if(theme) updateData.theme = theme;
+    if(soundEnabled !== undefined) updateData.soundEnabled = soundEnabled;
     if (notifications !== undefined) updateData.notifications = notifications;
 
     const user = await User.findOneAndUpdate(
