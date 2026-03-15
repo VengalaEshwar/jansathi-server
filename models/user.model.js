@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
     // ── Preferences ──────────────────────────────────────────────
     language: { type: String, enum: ["en", "hi", "te"], default: "en" },
     theme: { type: String, enum: ["dark", "light"], default: "dark" },
+    soundEnabled : { type: Boolean, default: true },
     notifications: {
       enabled: { type: Boolean, default: true },
       medicationReminders: { type: Boolean, default: true },
