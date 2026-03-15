@@ -25,7 +25,7 @@ export const updateProfile = async (req, res) => {
 
 export const updatePreferences = async (req, res) => {
   try {
-    const { language, notifications } = req.body;
+    const { language, notifications,theme, soundEnabled } = req.body;
     const updateData = {};
     if (language) updateData.language = language;
     if(theme) updateData.theme = theme;
