@@ -66,7 +66,8 @@ export const readPrescription = async (req, res) => {
     const mimeType = req.file.mimetype;
 
     const response = await groq.chat.completions.create({
-      model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+      // ✅ Updated to the active Groq Llama 4 Vision model
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
       messages: [
         {
           role: "user",
@@ -138,7 +139,8 @@ export const analyzeMedicine = async (req, res) => {
     const mimeType = req.file.mimetype;
 
     const response = await groq.chat.completions.create({
-      model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+      // ✅ Updated to the active Groq Llama 4 Vision model
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
       messages: [
         {
           role: "user",
@@ -202,6 +204,7 @@ Keep it simple and easy to understand.`,
     res.status(500).json({ success: false, message: error.message || "Analysis failed" });
   }
 };
+
 export const getHistory = async (req, res) => {
   try {
     const { type } = req.params; // "prescription" or "medicine"
