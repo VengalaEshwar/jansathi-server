@@ -1,37 +1,51 @@
 // models/volunteer.model.js
 import mongoose from "mongoose";
 
-// ── Volunteer registration ────────────────────────────────────────────────────
+// ── Volunteer Registration ─────────────────────────────────────────────────────
 const volunteerRegistrationSchema = new mongoose.Schema(
   {
+    // ✅ Linked to Firebase user — set when a logged-in user registers
+    userId:       { type: String, default: "", index: true },
+
     name:         { type: String, required: true, trim: true },
     organisation: { type: String, default: "", trim: true },
     phone:        { type: String, required: true, trim: true },
     location:     { type: String, default: "", trim: true },
-    speciality:   {
+
+    // ✅ Coordinates for "nearby" queries
+    coordinates: {
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
+    },
+
+    speciality: {
       type: String,
       enum: ["legal", "health", "education", "government", "general"],
       required: true,
     },
-    languages:    { type: String, default: "" },
-    bio:          { type: String, required: true },
-    idProof:      { type: String, default: "" },
-    status:       { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
-    isActive:     { type: Boolean, default: false },   // true = shows in public directory
-    rating:       { type: Number, default: 0 },
-    helpedCount:  { type: Number, default: 0 },
+
+    // ✅ Array instead of comma-separated string
+    languages:   { type: [String], default: [] },
+    bio:         { type: String, required: true },
+    idProof:     { type: String, default: "" },
+
+    status:      { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+    isActive:    { type: Boolean, default: false },
+    rating:      { type: Number, default: 0 },
+    helpedCount: { type: Number, default: 0 },
+    available:   { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-// ── Help request ──────────────────────────────────────────────────────────────
+// ── Help Request ───────────────────────────────────────────────────────────────
 const helpRequestSchema = new mongoose.Schema(
   {
-    userId:      { type: String, default: "" },   // Firebase UID if logged in
+    userId:      { type: String, default: "", index: true },
     name:        { type: String, required: true, trim: true },
     phone:       { type: String, required: true, trim: true },
     location:    { type: String, default: "", trim: true },
-    helpType:    {
+    helpType: {
       type: String,
       enum: ["legal", "health", "education", "government", "general"],
       required: true,
@@ -45,4 +59,4 @@ const helpRequestSchema = new mongoose.Schema(
 );
 
 export const VolunteerRegistration = mongoose.model("VolunteerRegistration", volunteerRegistrationSchema);
-export const HelpRequest           = mongoose.model("HelpRequest", helpRequestSchema);
+export const HelpRequest           = mongoose.model("HelpRequest",           helpRequestSchema);

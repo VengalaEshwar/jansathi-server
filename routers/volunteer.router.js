@@ -1,35 +1,33 @@
 // routes/volunteer.routes.js
 import express from "express";
+import verifyFirebaseToken from "../utils/firebaseAuth.js";
 import {
   getVolunteers,
   registerVolunteer,
+  editVolunteer,
+  deleteVolunteer,
+  getMyRegistration,
   submitHelpRequest,
-  getPendingApplications,
-  updateApplicationStatus,
-  getHelpRequests,
+  getOpenRequests,
+  getMyRequests,
+  deleteHelpRequest,
 } from "../controllers/volunteer.controller.js";
-import verifyFirebaseToken from "../utils/firebaseAuth.js";
 
 const router = express.Router();
 
-// ── Public routes (no auth needed) ───────────────────────────────────────────
-// GET  /volunteer               — approved volunteer directory (?speciality=&search=)
-router.get("/", getVolunteers);
+// ── Public ─────────────────────────────────────────────────────────────────────
+router.get("/", getVolunteers);                          // GET  /volunteer
 
-// POST /volunteer/register      — submit volunteer registration application
-router.post("/register", registerVolunteer);
+// ── Authenticated ──────────────────────────────────────────────────────────────
+router.post  ("/register",        verifyFirebaseToken, registerVolunteer);   // POST /volunteer/register
+router.get   ("/my-registration", verifyFirebaseToken, getMyRegistration);   // GET  /volunteer/my-registration
+router.post  ("/request",         verifyFirebaseToken, submitHelpRequest);   // POST /volunteer/request
+router.get   ("/open-requests",   verifyFirebaseToken, getOpenRequests);     // GET  /volunteer/open-requests
+router.get   ("/my-requests",     verifyFirebaseToken, getMyRequests);       // GET  /volunteer/my-requests
+router.delete("/request/:id",     verifyFirebaseToken, deleteHelpRequest);   // DELETE /volunteer/request/:id
 
-// POST /volunteer/request       — submit help request (auth optional)
-router.post("/request", submitHelpRequest);
-
-// ── Protected routes (require Firebase token) ─────────────────────────────────
-// GET  /volunteer/admin/applications       — list pending applications
-router.get("/admin/applications", verifyFirebaseToken, getPendingApplications);
-
-// PATCH /volunteer/admin/applications/:id  — approve or reject
-router.patch("/admin/applications/:id", verifyFirebaseToken, updateApplicationStatus);
-
-// GET  /volunteer/admin/requests           — list all help requests
-router.get("/admin/requests", verifyFirebaseToken, getHelpRequests);
+// ── Must be LAST — param routes catch-all ─────────────────────────────────────
+router.patch ("/edit/:id",   verifyFirebaseToken, editVolunteer);    // PATCH  /volunteer/edit/:id
+router.delete("/delete/:id", verifyFirebaseToken, deleteVolunteer);  // DELETE /volunteer/delete/:id
 
 export default router;
