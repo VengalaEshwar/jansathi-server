@@ -25,11 +25,12 @@ export const updateProfile = async (req, res) => {
 
 export const updatePreferences = async (req, res) => {
   try {
-    const { language, notifications,theme, soundEnabled } = req.body;
+    const { language, notifications,theme, soundEnabled , voiceAssistantEnabled } = req.body;
     const updateData = {};
     if (language) updateData.language = language;
     if(theme) updateData.theme = theme;
     if(soundEnabled !== undefined) updateData.soundEnabled = soundEnabled;
+    if(voiceAssistantEnabled !== undefined) updateData.voiceAssistantEnabled = voiceAssistantEnabled;
     if (notifications !== undefined) updateData.notifications = notifications;
 
     const user = await User.findOneAndUpdate(

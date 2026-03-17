@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
     language: { type: String, enum: ["en", "hi", "te"], default: "en" },
     theme: { type: String, enum: ["dark", "light"], default: "dark" },
     soundEnabled: { type: Boolean, default: true },
+    voiceAssistantEnabled: { type: Boolean, default: false },
     preferences: {
       theme:        { type: String, enum: ["dark", "light"], default: "dark" },
       language:     { type: String, default: "en" },

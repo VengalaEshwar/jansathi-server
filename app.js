@@ -11,7 +11,8 @@ import schemeRouter from "./routers/scheme.router.js";
 import reminderRouter from "./routers/reminder.router.js";
 import cronRouter from "./routers/cron.router.js";
 import volunteerRouter from "./routers/volunteer.router.js";
-import guideRoutes from "./routers/guide.router.js";
+import guideRouter from "./routers/guide.router.js";
+import voiceRouter from "./routers/voice.router.js";
 
 const app = express();
 
@@ -54,7 +55,8 @@ app.use("/api/schemes", schemeRouter);
 app.use("/api/reminders", reminderRouter);
 app.use("/api/cron", cronRouter);
 app.use("/api/volunteer", volunteerRouter);
-app.use("/api/guide", guideRoutes);
+app.use("/api/guide", guideRouter);
+app.use("/api/voice", voiceRouter);
 // ── Gemini Models ─────────────────────────────────────────────────
 app.get("/models", async (req, res) => {
   const { GoogleGenAI } = await import("@google/genai");
