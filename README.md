@@ -9,15 +9,21 @@
 <!-- Add your screenshots here -->
 | Home | Health Services | Government Assist |
 |------|----------------|-------------------|
-| ![Home]() | ![Health]() | ![G-Assist]() |
+| ![Home](./assets/images/screenshots/home.jpeg) | ![Health](./assets/images/screenshots/health.jpeg) | ![G-Assist](./assets/images/screenshots/g-assist.jpeg) |
 
 | Danger Alerts | Step Guides | Volunteer Network |
 |---------------|-------------|-------------------|
-| ![Danger Alerts]() | ![Step Guides]() | ![Volunteer]() |
+| ![Danger Alerts](./assets/images/screenshots/danger.jpeg) | ![Step Guides](./assets/images/screenshots/steps-guide.jpeg) | ![Volunteer](./assets/images/screenshots/vlounteer.jpeg) |
 
-| Profile | Auth | Medicine Scanner |
+| Profile | Health Notifications | Medicine Scanner |
 |---------|------|-----------------|
-| ![Profile]() | ![Auth]() | ![Medicine]() |
+| ![Profile](./assets/images/screenshots/profile.jpeg) | ![Auth](./assets/images/screenshots/health-notify.jpeg) | ![Medicine](./assets/images/screenshots/medicine-scanner.jpeg) |
+| Near By Clinics | prescription Reader | Medicine Scanner |
+|---------|------|-----------------|
+| ![clinics](./assets/images/screenshots/clinics.jpeg) | ![prescription](./assets/images/screenshots/prescription.jpeg) | ![Medicine](./assets/images/screenshots/ai-assist.jpeg) |
+| Schemes Finder | photo to form | Auth Page |
+|---------|------|-----------------|
+| ![Schemes](./assets/images/screenshots/schemes.jpeg) | ![prescription](./assets/images/screenshots/photoform.jpeg) | ![Auth](./assets/images/screenshots/auth.jpeg) |
 
 ---
 
