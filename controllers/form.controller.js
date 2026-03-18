@@ -31,12 +31,35 @@ const getProfileValue = (label, user) => {
   return "";
 };
 
+// Helper: Clean up orphaned files older than 1 hour in the background
+const cleanOldTempFiles = (dir) => {
+  try {
+    if (!fs.existsSync(dir)) return;
+    const files = fs.readdirSync(dir);
+    const now = Date.now();
+    files.forEach((file) => {
+      const filePath = path.join(dir, file);
+      const stats = fs.statSync(filePath);
+      // 3600000 ms = 1 hour
+      if (now - stats.mtimeMs > 3600000) {
+        try { fs.unlinkSync(filePath); } catch (e) {}
+      }
+    });
+  } catch (err) {
+    console.error("Cleanup error:", err);
+  }
+};
+
 // Step 1: Extract form fields + pre-fill from user profile
 export const extractFormFields = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: "Form image is required" });
     }
+
+    // Run the cleanup utility to prevent orphaned files from building up
+    const tempDir = path.join(__dirname, "../temp");
+    cleanOldTempFiles(tempDir);
 
     const base64Image = req.file.buffer.toString("base64");
     const mimeType = req.file.mimetype;
@@ -94,7 +117,6 @@ Extract ALL fields visible in the form. Be thorough.`,
 
     // Save form image temporarily
     const imageId = `form_${Date.now()}`;
-    const tempDir = path.join(__dirname, "../temp");
     if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
     const imagePath = path.join(tempDir, `${imageId}.jpg`);
     await sharp(req.file.buffer).jpeg().toFile(imagePath);
@@ -108,15 +130,14 @@ Extract ALL fields visible in the form. Be thorough.`,
 
 // Step 2: Fill form, generate PDF, upload to Cloudinary, save history
 export const fillForm = async (req, res) => {
-  try {
-    const { imageId, formData, saveToProfile } = req.body;
+  const { imageId, formData, saveToProfile } = req.body;
+  const tempDir = path.join(__dirname, "../temp");
+  const imagePath = imageId ? path.join(tempDir, `${imageId}.jpg`) : null;
 
+  try {
     if (!imageId || !formData) {
       return res.status(400).json({ success: false, message: "imageId and formData are required" });
     }
-
-    const tempDir = path.join(__dirname, "../temp");
-    const imagePath = path.join(tempDir, `${imageId}.jpg`);
 
     if (!fs.existsSync(imagePath)) {
       return res.status(404).json({ success: false, message: "Form image not found or expired" });
@@ -232,13 +253,20 @@ export const fillForm = async (req, res) => {
       );
     }
 
-    // Cleanup temp files
-    try { fs.unlinkSync(imagePath); } catch (e) {}
-
     res.json({ success: true, pdfUrl, message: "Form filled successfully" });
   } catch (error) {
     console.error("Form fill error:", error);
     res.status(500).json({ success: false, message: error.message || "Failed to fill form" });
+  } finally {
+    // ── GUARANTEED CLEANUP ────────────────────────────────────────
+    // This block ALWAYS runs, even if the PDF or Cloudinary upload crashes.
+    if (imagePath && fs.existsSync(imagePath)) {
+      try {
+        fs.unlinkSync(imagePath);
+      } catch (cleanupError) {
+        console.error("Failed to clean up temp file:", cleanupError);
+      }
+    }
   }
 };
 
