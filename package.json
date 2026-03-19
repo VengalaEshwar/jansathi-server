@@ -1,0 +1,42 @@
+{
+  "name": "jansathi-server",
+  "version": "1.0.0",
+  "description": "jansathi: an ai co pilot for government access and medical awareness",
+  "keywords": [
+    "jansathi"
+  ],
+  "license": "ISC",
+  "author": "Eshwar Vengala",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "@google/genai": "^1.44.0",
+    "@react-native-firebase/messaging": "^23.8.6",
+    "axios": "^1.13.6",
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^1.41.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "fast2sms": "^1.0.3",
+    "firebase-admin": "^13.7.0",
+    "groq-sdk": "^0.37.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.4",
+    "morgan": "^1.10.1",
+    "multer": "^2.1.1",
+    "multer-storage-cloudinary": "^4.0.0",
+    "node-cron": "^4.2.1",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^8.0.2",
+    "nodemon": "^3.1.14",
+    "pdf-lib": "^1.17.1",
+    "resend": "^6.9.3",
+    "sharp": "^0.34.5",
+    "twilio": "^5.12.2"
+  }
+}
